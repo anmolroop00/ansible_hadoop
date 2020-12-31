@@ -1,0 +1,38 @@
+- hosts: namenode
+  tasks:
+  - name: copying jdk software
+    copy:
+            src: "/root/Downloads/jdk-8u221-linux-x64.rpm"
+            dest: "/root"
+  - name: copying hadoop software
+    copy:
+            src: "/root/Downloads/hadoop-1.2.1-1.x86_64.rpm"
+            dest: "/root"
+  - name: intalling jdk
+    command:
+            cmd: "rpm -ivh jdk-8u221-linux-x64.rpm --force"
+  - name: Installing hadoop
+    command:
+            cmd: "rpm -ivh hadoop-1.2.1-1.x86_64.rpm --force"
+  - name: configure hdfs file
+    lineinfile:
+            path: "/etc/hadoop/hdfs-site.xml"
+            regexp: "</configuration>"
+            insertafter: "<configuration>"
+            line: "<property>\n<name>dfs.name.dir</name>\n<value>/namenode</value>\n</property>\n</configuration>"
+  - name: configuring core file
+    lineinfile:
+            path: "/etc/hadoop/core-site.xml"
+            regexp: "</configuration>"
+            insertafter: "<configuration>"
+            line: "<property>\n<name>fs.default.name</name>\n<value>hdfs://{{ ansible_facts['default_ipv4']['address'] }}:9001</value>\n</property>\n</configuration>"
+  - name: creating directory
+    file:
+            path: "/namenode"
+            state: directory
+  - name: formating namenode
+    shell: "echo Y | hadoop namenode -format"
+  - name: starting namenode
+    command: "hadoop-daemon.sh start namenode"
+
+
