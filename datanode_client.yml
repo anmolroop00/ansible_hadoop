@@ -1,0 +1,48 @@
+- hosts: datanode, clint
+  tasks:
+  - name: copying jdk software
+    copy:
+            src: "/root/Downloads/jdk-8u221-linux-x64.rpm"
+            dest: "/root"
+  - name: copying hadoop software
+    copy:
+            src: "/root/Downloads/hadoop-1.2.1-1.x86_64.rpm"
+            dest: "/root"
+  - name: intalling jdk
+    command:
+            cmd: "rpm -ivh jdk-8u221-linux-x64.rpm --force"
+  - name: Installing hadoop
+    command:
+            cmd: "rpm -ivh hadoop-1.2.1-1.x86_64.rpm --force"
+
+- hosts: datanode
+  tasks:
+  - name: Configuring hdfs file
+    lineinfile:
+            path: "/etc/hadoop/hdfs-site.xml"
+            regexp: "</configuration>"
+            insertafter: "<configuration>"
+            line: "<property>\n<name>dfs.data.dir</name>\n<value>/data</value>\n</property>\n</configuration>"
+  - name: Configuring core file
+    lineinfile:
+                 path: "/etc/hadoop/core-site.xml"
+                 regexp: '</configuration>'
+                 insertafter: '<configuration>'
+                 line: "<property>\n<name>fs.default.name</name>\n<value>hdfs://{{ 'namenode' }}:9001</value>\n</property>\n</configuration>"
+  - name: Creating directory
+    file:
+            path: "/data"
+            state: directory
+  - name: Starting datanode
+    command: "hadoop-daemon.sh start datanode"
+
+- hosts: clint
+  tasks:
+  - name: Configuring clint node
+    lineinfile:
+                 path: "/etc/hadoop/core-site.xml"
+                 regexp: '</configuration>'
+                 insertafter: '<configuration>'
+                 line: "<property>\n<name>fs.default.name</name>\n<value>hdfs://{{ 'namenode' }}:9001</value>\n</property>\n</configuration>"
+
+
