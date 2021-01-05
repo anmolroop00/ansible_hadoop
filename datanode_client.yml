@@ -28,7 +28,7 @@
                  path: "/etc/hadoop/core-site.xml"
                  regexp: '</configuration>'
                  insertafter: '<configuration>'
-                 line: "<property>\n<name>fs.default.name</name>\n<value>hdfs://{{ 'namenode' }}:9001</value>\n</property>\n</configuration>"
+                 line: "<property>\n<name>fs.default.name</name>\n<value>hdfs://{{ groups['namenode'] }}:9001</value>\n</property>\n</configuration>"
   - name: Creating directory
     file:
             path: "/data"
